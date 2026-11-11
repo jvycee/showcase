@@ -537,3 +537,4 @@ p.idx-list { display: block; }
   .foot { display: none; }
   .contact { padding-bottom: calc(2.5rem + env(safe-area-inset-bottom)); }
 }
+.soon-tag { text-transform: none; }
