@@ -538,3 +538,5 @@ p.idx-list { display: block; }
   .contact { padding-bottom: calc(2.5rem + env(safe-area-inset-bottom)); }
 }
 .soon-tag { text-transform: none; }
+.contact { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+@media (max-width:800px){ .contact{padding-bottom:calc(2.5rem + env(safe-area-inset-bottom))} }
