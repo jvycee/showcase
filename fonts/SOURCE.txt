@@ -1,0 +1,3 @@
+Inter and Inter Tight: @fontsource (same files as jaycee.wtf live).
+JetBrains Mono: @fontsource/jetbrains-mono@5.2.8 latin 400.
+Licenses: OFL.txt (Inter), OFL-jetbrains-mono.txt.
