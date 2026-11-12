@@ -4,7 +4,8 @@
 The site is served at https://jvycee.github.io/showcase/ (trailing slash).
 Relative URLs stay under that prefix. Root-relative and protocol-relative
 URLs do not, so this check rejects them. External http(s) URLs are allowed
-only on navigations (a, area), never on stylesheets, fonts, images, or scripts.
+only on navigations (a, area) and on the one Google tag in <head>. Stylesheets,
+fonts, and images stay local.
 """
 
 from __future__ import annotations
@@ -19,6 +20,10 @@ ROOT = Path(__file__).resolve().parents[2]
 SITE_HOST = "jvycee.github.io"
 SITE_PREFIX = "/showcase/"
 ALLOWED_EMAIL = "hello@cybercatlabs.com"
+# GSC's Google Analytics verification looks for this exact tag in <head>.
+# It is the only external script the site is allowed to load.
+GTAG_SRC = "https://www.googletagmanager.com/gtag/js?id=G-8Y03WYLQF8"
+GTAG_CONFIG = "gtag('config', 'G-8Y03WYLQF8')"
 EMAIL_RE = re.compile(rb"[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}")
 CSS_URL_RE = re.compile(
     r"url\(\s*(?:'(?P<s>[^']*)'|\"(?P<d>[^\"]*)\"|(?P<u>[^)]*))\s*\)",
@@ -175,6 +180,9 @@ def check_url(raw: str, base_url: str, kind: str, problems: list[str], notes: li
         if kind == "nav":
             notes.append(f"external navigation {absolute}")
             return
+        if kind == "script" and absolute == GTAG_SRC:
+            notes.append(f"allowed google tag {absolute}")
+            return
         label = "external script" if kind == "script" else "external asset"
         problems.append(f"{label} {absolute} on {where}")
         return
@@ -213,6 +221,11 @@ def check_emails(problems: list[str]) -> dict[str, int]:
     if counts.get(ALLOWED_EMAIL, 0) < 1:
         problems.append(f"missing required email {ALLOWED_EMAIL}")
     return counts
+
+
+def head_inner(text: str) -> str:
+    match = re.search(r"<head\b[^>]*>(.*)</head>", text, re.IGNORECASE | re.DOTALL)
+    return match.group(1) if match else ""
 
 
 def main() -> int:
@@ -256,6 +269,12 @@ def main() -> int:
                 problems.append(f"inline script references an external URL in {path.relative_to(ROOT)}")
         if JS_SCHEME_RE.search(text):
             problems.append(f"javascript: URL in {path.relative_to(ROOT)}")
+        head = head_inner(text)
+        rel = path.relative_to(ROOT)
+        if GTAG_SRC not in head:
+            problems.append(f"google tag script missing from <head> in {rel}")
+        if GTAG_CONFIG not in head:
+            problems.append(f"google tag config missing from <head> in {rel}")
 
     for path in iter_files():
         if path.suffix.lower() != ".css":
@@ -294,7 +313,7 @@ def main() -> int:
         for problem in problems:
             print(f"  {problem}", file=sys.stderr)
         return 1
-    print("OK: local assets resolve under /showcase/, sole email is hello@cybercatlabs.com, no external scripts")
+    print("OK: local assets resolve under /showcase/, sole email is hello@cybercatlabs.com, only external script is the Google tag in <head>")
     return 0
 
 
