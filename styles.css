@@ -534,7 +534,6 @@ p.idx-list { display: block; }
 @media (max-width: 800px) {
   .section, .work, .contact { padding-top: 1.5rem; }
   .sec-label, .work h2, .contact h2 { margin-bottom: 1.5rem; }
-  .foot { display: none; }
   .contact { padding-bottom: calc(2.5rem + env(safe-area-inset-bottom)); }
 }
 .soon-tag { text-transform: none; }
